@@ -1,0 +1,41 @@
+version: '3.8'
+
+services:
+  scylla1:
+    image: scylladb/scylla
+    container_name: some-scylla
+    hostname: some-scylla
+    command: --reactor-backend=epoll --seeds=some-scylla2,some-scylla3 --endpoint-snitch=GossipingPropertyFileSnitch
+    networks:
+      - scylla-network
+    volumes:
+      - "./cassandra-rackdc-1.properties:/etc/scylla/cassandra-rackdc.properties"
+  
+
+  scylla2:
+    image: scylladb/scylla
+    container_name: some-scylla2
+    hostname: some-scylla2
+    command: --reactor-backend=epoll --seeds=some-scylla,some-scylla3 --endpoint-snitch=GossipingPropertyFileSnitch
+    networks:
+      - scylla-network
+    volumes:
+      - "./cassandra-rackdc-2.properties:/etc/scylla/cassandra-rackdc.properties"
+    depends_on:
+      - scylla1
+
+  scylla3:
+    image: scylladb/scylla
+    container_name: some-scylla3
+    hostname: some-scylla3
+    command: --reactor-backend=epoll --seeds=some-scylla,some-scylla2 --endpoint-snitch=GossipingPropertyFileSnitch
+    networks:
+      - scylla-network
+    volumes:
+      - "./cassandra-rackdc-3.properties:/etc/scylla/cassandra-rackdc.properties"
+    depends_on:
+      - scylla1
+
+networks:
+  scylla-network:
+    driver: bridge

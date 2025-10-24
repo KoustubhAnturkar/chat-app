@@ -1,0 +1,18 @@
+syntax = "proto3";
+
+package com.example.chat;
+
+option java_multiple_files=true;
+option java_package="com.example.chat.proto";
+option java_outer_classname="ChatMessageProto";
+
+import "common.proto";
+
+message ChatMessage{
+  string message_id=1;
+  Channel channel=2;
+  User sender=3;
+  string body=4;
+  MessageType type=5;
+  int64 time_stamp=6;
+}

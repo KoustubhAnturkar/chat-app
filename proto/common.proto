@@ -1,0 +1,24 @@
+syntax = "proto3";
+
+package com.example.chat;
+
+option java_multiple_files = true;
+option java_package = "com.example.chat.proto";
+option java_outer_classname = "CommonProto";
+
+enum MessageType {
+  MESSAGE_TEXT = 0;
+  MESSAGE_IMAGE = 1;
+}
+
+message User {
+  string user_id = 1;
+  string username = 2;
+  string display_name = 3;
+}
+
+message Channel {
+  string channel_id = 1;
+  string name = 2;
+  string description = 3;
+}
