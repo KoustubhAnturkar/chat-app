@@ -1,0 +1,121 @@
+version: '3'
+services:
+#  schema-registry:
+#    image: confluentinc/cp-schema-registry:latest
+#    hostname: schema-registry
+#    depends_on:
+#      - kafka-broker-1
+#      - kafka-broker-2
+#      - kafka-broker-3
+#    ports:
+#      - "8081:8081"
+#    environment:
+#      SCHEMA_REGISTRY_HOST_NAME: schema-registry
+#      SCHEMA_REGISTRY_LISTENERS: http://schema-registry:8081
+#      SCHEMA_REGISTRY_KAFKASTORE_BOOTSTRAP_SERVERS: PLAINTEXT://kafka-broker-1:19092,PLAINTEXT://kafka-broker-2:19093,PLAINTEXT://kafka-broker-3:19094
+##      SCHEMA_REGISTRY_KAFKASTORE_BOOTSTRAP_CONTROLLERS: PLAINTEXT://localhost:9093,PLAINTEXT://localhost:9095,PLAINTEXT://localhost:9097
+#      SCHEMA_REGISTRY_DEBUG: 'true'
+
+  # Kafka Nodes
+  kafka-broker-1:
+    image: confluentinc/cp-kafka:latest
+    hostname: kafka-broker-1
+    ports:
+      - "9092:9092"
+      - "9093:9093"
+      - "19092:19092"
+    environment:
+      KAFKA_NODE_ID: 1
+      KAFKA_CONTROLLER_QUORUM_VOTERS: '1@host.docker.internal:9093,2@host.docker.internal:9095,3@host.docker.internal:9097'
+      KAFKA_PROCESS_ROLES: 'broker,controller'
+      KAFKA_CONTROLLER_LISTENER_NAMES: 'CONTROLLER'
+      KAFKA_LISTENERS: 'PLAINTEXT://0.0.0.0:9092,CONTROLLER://0.0.0.0:9093,SCHEMA_REGISTRY://0.0.0.0:19092'
+      KAFKA_ADVERTISED_LISTENERS: 'PLAINTEXT://localhost:9092,SCHEMA_REGISTRY://kafka-broker-1:19092'
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: 'CONTROLLER:PLAINTEXT,PLAINTEXT:PLAINTEXT,SCHEMA_REGISTRY:PLAINTEXT'
+      KAFKA_INTER_BROKER_LISTENER_NAME: 'SCHEMA_REGISTRY'
+      CLUSTER_ID: 'NqK22SSvTuOIw4nPBoGt4A'
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 3
+
+  kafka-broker-2:
+    image: confluentinc/cp-kafka:latest
+    hostname: kafka-broker-2
+    ports:
+      - "9094:9094"
+      - "9095:9095"
+      - "19093:19093"
+    environment:
+      KAFKA_NODE_ID: 2
+      KAFKA_CONTROLLER_QUORUM_VOTERS: '1@host.docker.internal:9093,2@host.docker.internal:9095,3@host.docker.internal:9097'
+      KAFKA_PROCESS_ROLES: 'broker,controller'
+      KAFKA_CONTROLLER_LISTENER_NAMES: 'CONTROLLER'
+      KAFKA_LISTENERS: 'PLAINTEXT://0.0.0.0:9094,CONTROLLER://0.0.0.0:9095,SCHEMA_REGISTRY://0.0.0.0:19093'
+      KAFKA_ADVERTISED_LISTENERS: 'PLAINTEXT://localhost:9094,SCHEMA_REGISTRY://kafka-broker-2:19093'
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: 'CONTROLLER:PLAINTEXT,PLAINTEXT:PLAINTEXT,SCHEMA_REGISTRY:PLAINTEXT'
+      KAFKA_INTER_BROKER_LISTENER_NAME: 'SCHEMA_REGISTRY'
+      CLUSTER_ID: 'NqK22SSvTuOIw4nPBoGt4A'
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 3
+
+  kafka-broker-3:
+    image: confluentinc/cp-kafka:latest
+    hostname: kafka-broker-3
+    ports:
+      - "9096:9096"
+      - "9097:9097"
+      - "19094:19094"
+    environment:
+      KAFKA_NODE_ID: 3
+      KAFKA_CONTROLLER_QUORUM_VOTERS: '1@host.docker.internal:9093,2@host.docker.internal:9095,3@host.docker.internal:9097'
+      KAFKA_PROCESS_ROLES: 'broker,controller'
+      KAFKA_CONTROLLER_LISTENER_NAMES: 'CONTROLLER'
+      KAFKA_LISTENERS: 'PLAINTEXT://0.0.0.0:9096,CONTROLLER://0.0.0.0:9097,SCHEMA_REGISTRY://0.0.0.0:19093'
+      KAFKA_ADVERTISED_LISTENERS: 'PLAINTEXT://localhost:9096,SCHEMA_REGISTRY://kafka-broker-3:19093'
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: 'CONTROLLER:PLAINTEXT,PLAINTEXT:PLAINTEXT,SCHEMA_REGISTRY:PLAINTEXT'
+      KAFKA_INTER_BROKER_LISTENER_NAME: 'SCHEMA_REGISTRY'
+      CLUSTER_ID: 'NqK22SSvTuOIw4nPBoGt4A'
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 3
+
+ # Scylla DB Nodes
+  scylla1:
+    image: scylladb/scylla
+    container_name: scylla
+    ports:
+      - "9042:9042"
+    hostname: scylla
+    command: --reactor-backend=epoll --seeds=scylla2,scylla3 --endpoint-snitch=GossipingPropertyFileSnitch
+    networks:
+      - scylla-network
+    volumes:
+      - "./cassandra-rack-config/cassandra-rackdc-1.properties:/etc/scylla/cassandra-rackdc.properties"
+
+  scylla2:
+    image: scylladb/scylla
+    container_name: scylla2
+    ports:
+      - "9043:9042"
+    hostname: scylla2
+    command: --reactor-backend=epoll --seeds=scylla,scylla3 --endpoint-snitch=GossipingPropertyFileSnitch
+    networks:
+      - scylla-network
+    volumes:
+      - "./cassandra-rack-config/cassandra-rackdc-2.properties:/etc/scylla/cassandra-rackdc.properties"
+    depends_on:
+      - scylla1
+
+  scylla3:
+    image: scylladb/scylla
+    container_name: scylla3
+    ports:
+      - "9044:9042"
+    hostname: scylla3
+    command: --reactor-backend=epoll --seeds=scylla,scylla2 --endpoint-snitch=GossipingPropertyFileSnitch
+    networks:
+      - scylla-network
+    volumes:
+      - "./cassandra-rack-config/cassandra-rackdc-3.properties:/etc/scylla/cassandra-rackdc.properties"
+    depends_on:
+      - scylla1
+networks:
+  default:
+    driver: bridge
+  scylla-network:
+    driver: bridge
