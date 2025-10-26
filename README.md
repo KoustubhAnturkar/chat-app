@@ -376,9 +376,6 @@ cd chat-backend
 | POST   | `/api/user/`                           | Create a new user       |
 | POST   | `/api/v1/message/{channelName}/send`   | Send message on Channel |
 
-<!-- Add API usage example screenshot here -->
-![API Example](./docs/images/api-example.png)
-
 ---
 
 ## Troubleshooting
