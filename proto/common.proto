@@ -22,3 +22,13 @@ message Channel {
   string name = 2;
   string description = 3;
 }
+
+enum UserUpdateType{
+  NEW_USER = 0;
+  DELETE_USER = 1;
+}
+
+enum ChannelUpdateType{
+  NEW_CHANNEL = 0;
+  DELETE_CHANNEL = 1;
+}

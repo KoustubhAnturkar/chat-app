@@ -1,0 +1,14 @@
+syntax = "proto3";
+
+package com.example.chat;
+
+option java_multiple_files=true;
+option java_package="com.example.chat.proto";
+option java_outer_classname="UserUpdateProto";
+
+import "common.proto";
+
+message UserUpdate{
+    UserUpdateType type = 1;
+    User user = 2;
+}

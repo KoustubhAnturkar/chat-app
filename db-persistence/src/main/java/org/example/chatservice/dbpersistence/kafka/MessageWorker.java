@@ -40,15 +40,14 @@ public class MessageWorker implements Runnable{
                 List<ResultSetFuture> futures = new ArrayList<>();
 
                 records.forEach(record -> {
-                    log.info("Processing record with key: '{}', partition: {}, offset: {}",
-                            record.key(), record.partition(), record.offset());
+                    log.info("Processing record with partition: {}, offset: {}",
+                            record.partition(), record.offset());
                     try {
                         ChatMessage message = ChatMessage.parseFrom(record.value());
-                        log.info(message.toString());
                         ResultSetFuture resultSetFuture = scyllaDB.storeMessage(
                             message.getChannel().getChannelId(),
                             message.getMessageId(),
-                            message.getMessageId(),
+                            message.getSender().getUserId(),
                             message.getBody(),
                             new Date(message.getTimeStamp())
                         );
