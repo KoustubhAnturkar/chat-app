@@ -1,0 +1,3 @@
+[submodule "chat-analytics"]
+	path = chat-analytics
+	url = https://github.com/KoustubhAnturkar/chat-analytics/
