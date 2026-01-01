@@ -462,7 +462,7 @@ class ChatApp {
                 headers: {
                     'Content-Type': 'text/plain'
                 },
-                body: channelDescription || ''
+                body: channelDescription || 'Default channel description'
             });
 
             if (!response.ok) {
